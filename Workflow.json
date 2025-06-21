@@ -1,0 +1,372 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/resume-analysis",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4edc343d-5db6-450b-b53a-33b275035fb8",
+      "name": "Webhook",
+      "webhookId": "b46c90a1-fd4d-43bb-8f6d-ee4110f214fa"
+    },
+    {
+      "parameters": {
+        "operation": "Convert from PDF",
+        "url": "={{ $json.body.pdf_url }}",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "d6563c7d-e3e3-4405-8853-5952923045d9",
+      "name": "PDFco Api",
+      "credentials": {
+        "pdfcoApi": {
+          "id": "Ni6XVx8dYEfL6ZzY",
+          "name": "PDF.co account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "71f4a417-56a6-49f9-a088-0daa6cfa8ed5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Extract the following information from the resume text below:\n\n- Full Name  \n- Email  \n- Phone Number  \n- Skills (list)  \n- Total Years of Experience  \n- Last Job Role\n\nProvide the output as a JSON object with these exact keys:  \n{ \"fullName\": \"\", \"email\": \"\", \"phone\": \"\", \"skills\": [], \"experienceYears\": \"\", \"lastRole\": \"\" }\n\nIf any information is missing, use an empty string or empty list.\nreturn a json not array of objects\nResume text:  {{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        660,
+        0
+      ],
+      "id": "a711c7cb-0295-480c-9d56-8618871e9a7b",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "F2l8ssQ9W81db2dA",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "candidates",
+          "mode": "list",
+          "cachedResultName": "candidates"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "full_name": "={{ $json.fullName }}",
+            "email": "={{ $json.email }}",
+            "phone": "={{ $json.phone }}",
+            "skills": "={{ $json.skills }}",
+            "experience": "={{ $json.experienceYears }}",
+            "last_role": "={{ $json.lastRole }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience",
+              "displayName": "experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_role",
+              "displayName": "last_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1240,
+        0
+      ],
+      "id": "bce90d24-932a-4562-be58-fca6a92c47a3",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "LxK7uEeRBmPr6RO7",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input data from previous node, e.g., OpenAI node\nconst items = $input.all();\n\nconst rawContent = items[0].json.message.content;\n\n// Remove markdown backticks and parse JSON\nconst jsonStr = rawContent.replace(/```json|```/g, '').trim();\nconst parsedData = JSON.parse(jsonStr);\n\n// Return structured JSON for next nodes\nreturn { json: parsedData };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        0
+      ],
+      "id": "185817f9-79f9-4dc9-9198-dae84fd12bc4",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "A Javascript code to create structured JSON\n",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1020,
+        140
+      ],
+      "typeVersion": 1,
+      "id": "4ce4f529-3b20-41d2-963a-659d036ef7fe",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "a web hook to be triggered from FastAPI as a resume is uploaded.\n",
+        "height": 80,
+        "width": 210
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -120,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "828544a9-3749-4f96-84f4-adc9998becf1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "PDFco Api provides text extraction service.\n",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        200,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "357631f3-c2cc-4d01-abd6-4d4fb79bb7ee",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "make http request to get/download the extracted resume texts.\n",
+        "height": 100,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        440,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "65c37dae-ea53-4c89-8f97-9b9bb0e80405",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "make a prompt using the extracted text to filter out the required fields.",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        680,
+        180
+      ],
+      "typeVersion": 1,
+      "id": "5965d8c5-6d37-4b6d-bd66-54693fe57a15",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "save the created JSON to the database.",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1240,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "0bdb89d1-3195-4280-ab27-54a6cf79b2ba",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "PDFco Api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFco Api": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "80b44da3-061a-4566-b130-6b6347c7e823",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "24a5cf2ffee53ad37c501ccc5f118c2926d8a06cfe8d067ebfe184178d4d322a"
+  },
+  "id": "4mTGxxE618ccCNWY",
+  "tags": []
+}
