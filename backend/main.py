@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.upload import router as upload_router  # Import the router
 from backend.auth import router as auth_router  # Import the router
 
+
 app = FastAPI()
 
 # Allow requests from your frontend (if needed)
