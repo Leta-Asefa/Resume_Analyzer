@@ -1,0 +1,2 @@
+📄 Resume Analyzer Automation System
+This project automates resume data extraction powered by OpenAI. It uses n8n for automation workflows, FastAPI for backend logic, and PostgreSQL as the main database. When a resume is uploaded, the system extracts relevant data (like name, contact, and experience) from the PDF and saves it to the database.
