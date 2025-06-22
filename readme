@@ -44,5 +44,5 @@ docker-compose up --build
 **Resume Analyzer API: http://localhost:8000**
 
 # 📡 Network Configuration
-##### All services are connected through a custom Docker network named resume_network, allowing them to communicate securely without exposing internal ports.
+##### All services are connected through a custom Docker network named resume_network, allowing them to communicate securely without exposing internal ports .
 
