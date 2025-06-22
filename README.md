@@ -12,9 +12,14 @@ Here is the n8n workflow
 - **.env file with the following environment variables:**
 
 <pre>
+JWT_SECRET_KEY=your_jwt_secret_key
 POSTGRES_USER=your_postgres_user
 POSTGRES_PASSWORD=your_postgres_password
 POSTGRES_DB=your_database_name
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret_key
+
 </pre>
 
 # ▶️ Running the Project
@@ -27,9 +32,13 @@ cd  Resume_Analyzer
 ### 2. Create a .env file in the root directory:
 
 <pre>
+JWT_SECRET_KEY=your_jwt_secret_key
 POSTGRES_USER=your_postgres_user
 POSTGRES_PASSWORD=your_postgres_password
 POSTGRES_DB=your_database_name
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret_key
 </pre>
 ### 3. Start the containers:
 
